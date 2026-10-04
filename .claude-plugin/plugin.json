@@ -1,0 +1,6 @@
+{
+  "name": "pixel-pet",
+  "version": "0.1.0",
+  "description": "8-bit pixel Claude pet above the prompt that reacts to what Claude is doing and chats via Haiku",
+  "types": "./types/index.d.ts"
+}

@@ -1,0 +1,5 @@
+# Written by Claude Code when it loads the plugin
+.claude-plugin/types/
+.claude/
+node_modules/
+.DS_Store
