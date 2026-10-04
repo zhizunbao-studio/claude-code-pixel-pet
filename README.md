@@ -2,6 +2,12 @@
 
 住在 Claude Code 输入框上方的 8-bit 像素电子宠物。它会跟着 Claude 正在做的事换动作，可以摸摸、喂食、戳一下，还能通过 Haiku 跟你聊天。
 
+<img src="docs/showcase.svg" alt="小克在 Claude Code 输入框上方的整体效果" width="100%">
+
+<sub>效果示意，图中的额度和花费是示例数据。</sub>
+
+## 表情一览
+
 <p>
   <img src="docs/idle.svg" width="176" alt="发呆">
   <img src="docs/bash.svg" width="176" alt="敲命令">
