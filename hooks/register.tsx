@@ -398,13 +398,17 @@ export const register: Register = on => {
 
       if (ui.isCollapsed) {
         return (
-          <Box flexDirection="row" gap={1} alignItems="center">
-            <Svg source={svg} alt={alt} width={66} height={42} isInteractive />
+          // Only the picture and one column at this level, as in the expanded
+          // band: a Button beside them here lays the row out off-centre.
+          <Box flexDirection="row" gap={2} alignItems="center">
+            <Svg source={svg} alt={alt} width={132} height={84} isInteractive />
             <Box flexDirection="column" gap={1} flexGrow={1}>
-              <Text dimColor>{head}</Text>
+              <Box flexDirection="row" gap={1} alignItems="center" justifyContent="space-between">
+                <Text dimColor>{head}</Text>
+                <Button key="expand" label="展开" plain onPress={() => void toggleCollapsed($)} />
+              </Box>
               {usageGroup}
             </Box>
-            <Button key="expand" label="展开" plain onPress={() => void toggleCollapsed($)} />
           </Box>
         )
       }
