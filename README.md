@@ -1,68 +1,81 @@
 # Claude Code Pixel Pet 小克
 
-住在 Claude Code 输入框上方的 8-bit 像素电子宠物。它会跟着 Claude 正在做的事换动作，可以摸摸、喂食、戳一下，还能通过 Haiku 跟你聊天。
+**English** | [简体中文](README.zh-CN.md)
 
-<img src="docs/showcase.svg" alt="小克在 Claude Code 输入框上方的整体效果" width="100%">
+An 8-bit pixel pet that lives above the Claude Code prompt. It acts out whatever Claude is doing, takes pets, snacks and pokes, chats with you through Haiku, and keeps an eye on your usage limits.
 
-<sub>效果示意，图中的额度和花费是示例数据。</sub>
+<img src="docs/showcase.svg" alt="The pet above the Claude Code prompt, cycling through thinking, running a command, reading, editing, done and being petted" width="100%">
 
-## 表情一览
+<sub>Mock-up with sample usage figures. The pet's own text is in Chinese.</sub>
+
+## Moods
 
 <p>
-  <img src="docs/idle.svg" width="176" alt="发呆">
-  <img src="docs/bash.svg" width="176" alt="敲命令">
-  <img src="docs/read.svg" width="176" alt="翻资料">
-  <img src="docs/edit.svg" width="176" alt="改代码">
+  <img src="docs/idle.svg" width="176" alt="Idle">
+  <img src="docs/bash.svg" width="176" alt="Running a command">
+  <img src="docs/read.svg" width="176" alt="Reading">
+  <img src="docs/edit.svg" width="176" alt="Editing">
 </p>
 <p>
-  <img src="docs/done.svg" width="176" alt="搞定">
-  <img src="docs/pet.svg" width="176" alt="被摸摸">
-  <img src="docs/eat.svg" width="176" alt="吃饭饭">
-  <img src="docs/sleep.svg" width="176" alt="睡着了">
+  <img src="docs/done.svg" width="176" alt="Done">
+  <img src="docs/pet.svg" width="176" alt="Petted">
+  <img src="docs/eat.svg" width="176" alt="Eating">
+  <img src="docs/sleep.svg" width="176" alt="Asleep">
 </p>
 
-## 功能
+## Features
 
-- **跟着任务变**：收到消息后思考，运行命令时敲电脑，读文件时翻书，改代码时拿笔写，上网时举放大镜，派子任务时叫出一个迷你分身；工具报错时哭，一轮完成时挥手蹦跳，10 分钟没动静会睡着。
-- **互动**：摸摸、喂食（喂多了会撑）、戳一下（连续戳会生气）、鼠标悬停冒爱心。等级和亲密度会保存下来，换会话也不会丢。
-- **Haiku 聊天**：点「聊天」直接跟它对话；一轮比较长的任务结束后，它会说一句感想（最多每 40 秒一次，比较省额度）。
-- **额度一览**：显示 5 小时和每周额度（8 格像素进度条，按用量变绿、黄、红），重置倒计时，本次会话的上下文 token 数和花费。
-- **命令**：`/pet` 收起或展开，`/pet name 新名字` 改名，`/pet stats` 查看数据。
+- **Follows the work**: thinks when you send a message, types at a laptop while a command runs, reads a book while files are read, writes with a pencil while code is edited, holds a magnifier on the web, and calls a mini helper for subagents. It cries when a tool fails, waves and hops when a turn is done, and falls asleep after 10 quiet minutes.
+- **Interaction**: pet it, feed it (it gets full), poke it (too many pokes and it gets grumpy), hover it for a heart. Level and affection persist across sessions.
+- **Haiku chat**: press 聊天 (chat) to talk to it. After a longer turn it says one line about what just happened, at most once every 40 seconds.
+- **Usage at a glance**: 5-hour and weekly limits as 8-cell pixel meters (green, yellow, red), time to reset, and the session's context tokens and cost.
+- **Commands**: `/pet` collapses or expands it, `/pet name <name>` renames it, `/pet stats` shows its stats.
 
-桌面版（Code 标签页）显示完整的像素画面；终端里显示颜文字版本。
+The desktop app (Code tab) draws the full pixel pet; the terminal shows a kaomoji version.
 
-## 安装
+## Install
 
-需要较新版本的 Claude Code，并且支持插件函数钩子（目前是早期预览接口，开发时用的是 2.1.287）。
+Requires a recent Claude Code with plugin function hooks. That API is in early access and may change between releases; the pet was built on 2.1.287.
 
-1. 把仓库克隆到本地：
+**One command** (macOS and Linux, needs `git` and either `python3` or `node`):
 
-   ```bash
-   git clone https://github.com/zhizunbao-studio/claude-code-pixel-pet.git ~/.claude/mods/pixel-pet
-   ```
+```bash
+curl -fsSL https://raw.githubusercontent.com/zhizunbao-studio/claude-code-pixel-pet/main/install.sh | bash
+```
 
-2. 在 `~/.claude/settings.json` 的最外层加上：
+It clones the plugin to `~/.claude/mods/pixel-pet`, backs up `~/.claude/settings.json`, and adds the two env entries below. Run it again to update. Then open a new Claude Code session, or restart the desktop app.
 
-   ```json
-   "env": {
-     "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/pixel-pet",
-     "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"
-   }
-   ```
+To uninstall:
 
-3. 新开一个会话，小克就会出现在输入框上方。
+```bash
+curl -fsSL https://raw.githubusercontent.com/zhizunbao-studio/claude-code-pixel-pet/main/install.sh | bash -s -- --uninstall
+```
 
-只想试一次的话，也可以在终端里直接运行 `claude --plugin-dir ~/.claude/mods/pixel-pet`。
+**By hand**: clone the repo to `~/.claude/mods/pixel-pet`, then add this at the top level of `~/.claude/settings.json`:
 
-## 开发
+```json
+"env": {
+  "CLAUDE_CODE_PLUGIN_DIRS": "~/.claude/mods/pixel-pet",
+  "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"
+}
+```
+
+To try it once without changing settings: `claude --plugin-dir ~/.claude/mods/pixel-pet`.
+
+## Notes
+
+- Chat and turn comments call Haiku through your own Claude Code session, so they count toward your plan's usage. Petting, feeding, poking and the canned lines run locally and use none.
+- Nothing is sent anywhere else: the plugin reads no files, runs no commands and makes no network requests of its own.
+
+## Development
 
 ```bash
 claude plugin validate .
 claude plugin test .
 ```
 
-## 声明
+## Disclaimer
 
-这是一个非官方的粉丝作品，与 Anthropic 没有任何关联，也没有得到 Anthropic 的认可。小克的像素造型来自 Claude Code 的吉祥物，相关形象和商标归 Anthropic 所有；如果权利方提出要求，会立即移除。
+This is an unofficial fan project. It is not affiliated with or endorsed by Anthropic. The pixel character is based on the Claude Code mascot, whose likeness and trademarks belong to Anthropic; it will be removed if the rights holder asks.
 
-代码部分以 MIT 协议开源（见 [LICENSE](LICENSE)），不包括上述吉祥物形象。
+The code is released under the MIT License (see [LICENSE](LICENSE)); the mascot likeness is not covered by it.
