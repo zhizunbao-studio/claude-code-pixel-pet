@@ -1,6 +1,6 @@
 {
   "name": "pixel-pet",
-  "version": "0.1.0",
-  "description": "8-bit pixel Claude pet above the prompt that reacts to what Claude is doing and chats via Haiku",
+  "version": "0.2.0",
+  "description": "8-bit pixel pet above the Claude Code prompt that reacts to what Claude is doing, chats via Haiku and shows usage, in English or Chinese",
   "types": "./types/index.d.ts"
 }

@@ -4,7 +4,7 @@
 
 住在 Claude Code 输入框上方的 8-bit 像素电子宠物。它会跟着 Claude 正在做的事换动作，可以摸摸、喂食、戳一下，还能通过 Haiku 跟你聊天，顺便帮你盯着额度。
 
-<img src="docs/showcase.svg" alt="小克在 Claude Code 输入框上方，依次演示思考、敲命令、翻资料、改代码、搞定和被摸摸" width="100%">
+<img src="docs/showcase.zh-CN.svg" alt="小克在 Claude Code 输入框上方，依次演示思考、敲命令、翻资料、改代码、搞定和被摸摸" width="100%">
 
 <sub>效果示意，图中的额度和花费是示例数据。</sub>
 
@@ -29,7 +29,8 @@
 - **互动**：摸摸、喂食（喂多了会撑）、戳一下（连续戳会生气）、鼠标悬停冒爱心。等级和亲密度会保存下来，换会话也不会丢。
 - **Haiku 聊天**：点「聊天」直接跟它对话；一轮比较长的任务结束后，它会说一句感想（最多每 40 秒一次）。
 - **额度一览**：显示 5 小时和每周额度（8 格像素进度条，按用量变绿、黄、红），重置倒计时，本次会话的上下文 token 数和花费。
-- **命令**：`/pet` 收起或展开，`/pet name 新名字` 改名，`/pet stats` 查看数据。
+- **中英双语**：自动跟随系统语言（中文系统显示中文，其他显示英文），也可以随时用 `/pet lang zh`、`/pet lang en`、`/pet lang auto` 切换，选择会记住。
+- **命令**：`/pet` 收起或展开，`/pet name 新名字` 改名，`/pet stats` 查看数据，`/pet lang` 切换语言。
 
 桌面版（Code 标签页）显示完整的像素画面；终端里显示颜文字版本。
 
@@ -43,7 +44,7 @@
 curl -fsSL https://raw.githubusercontent.com/zhizunbao-studio/claude-code-pixel-pet/main/install.sh | bash
 ```
 
-脚本会把插件下载到 `~/.claude/mods/pixel-pet`，先备份 `~/.claude/settings.json`，再加上下面两项配置。再运行一次就是更新。装好后新开一个会话，或者重启桌面 App。
+脚本会把插件下载到 `~/.claude/mods/pixel-pet`，先备份 `~/.claude/settings.json`，再加上下面两项配置。再运行一次就是更新。装好后新开一个会话，或者重启桌面 App，小克就会出现。如果显示的是英文，运行 `/pet lang zh` 切到中文。
 
 卸载：
 

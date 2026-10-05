@@ -1,8 +1,9 @@
 // Pure helpers for the usage group beside the buttons.
 
-const WINDOW_LABEL: Record<string, string> = { five_hour: '5小时', seven_day: '每周' }
+import type { Durations } from './i18n'
 
-export const windowLabel = (kind: string): string | undefined => WINDOW_LABEL[kind]
+/** The rate-limit windows the band shows, in order. */
+export const SHOWN_WINDOWS = ['five_hour', 'seven_day']
 
 export const levelColor = (percent: number): string =>
   percent < 60 ? '#5BBF6A' : percent < 85 ? '#E5A82E' : '#E5534B'
@@ -15,18 +16,18 @@ export const fmtTokens = (n: number): string => {
   return String(n)
 }
 
-/** Time left until `iso`, as `45分`, `4小时38分` or `2天4小时`; empty when unreadable. */
-export const fmtReset = (iso: string | undefined, now: number): string => {
+/** Time left until `iso` in the language's units (`4h 38m`, `4小时38分`); empty when unreadable. */
+export const fmtReset = (iso: string | undefined, now: number, units: Durations): string => {
   if (iso === undefined) return ''
   const ms = Date.parse(iso) - now
   if (Number.isNaN(ms)) return ''
-  if (ms <= 0) return '马上'
+  if (ms <= 0) return units.now
   const minutes = Math.floor(ms / 60_000)
-  if (minutes < 60) return `${minutes}分`
+  if (minutes < 60) return units.minutes(minutes)
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}小时${minutes % 60}分`
+  if (hours < 24) return units.hours(hours, minutes % 60)
 
-  return `${Math.floor(hours / 24)}天${hours % 24}小时`
+  return units.days(Math.floor(hours / 24), hours % 24)
 }
 
 const METER_CELLS = 8

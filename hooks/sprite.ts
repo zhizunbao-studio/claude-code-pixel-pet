@@ -318,7 +318,7 @@ const LOOKS: Record<PetMood, Look> = {
 }
 
 // One complete SVG document for a mood: device shell, LCD, pet, effects.
-export function drawPet(mood: PetMood): string {
+export function drawPet(mood: PetMood, title = ''): string {
   const look = LOOKS[mood]
   const body =
     map(BODY, BODY_PALETTE, OX, OY) +
@@ -331,7 +331,7 @@ export function drawPet(mood: PetMood): string {
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 28" width="176" height="112" shape-rendering="crispEdges">` +
-    `<title>摸摸我～</title>` +
+    (title === '' ? '' : `<title>${title}</title>`) +
     `<style>.hov{opacity:0;transition:opacity .2s}svg:hover .hov{opacity:1}</style>` +
     `<defs><pattern id="grid" width="1" height="1" patternUnits="userSpaceOnUse">` +
     `<rect width="1" height="1" fill="none" stroke="${C.grid}" stroke-width="0.1"/></pattern></defs>` +

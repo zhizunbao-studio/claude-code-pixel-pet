@@ -30,6 +30,8 @@ export type PetStats = {
   lastFedAt: number
 }
 
+export type PetLang = 'zh' | 'en'
+
 export type PetUi = { isCollapsed: boolean; isChatOpen: boolean; isBusy: boolean }
 
 export type PetChatLine = { from: 'me' | 'pet'; text: string }
@@ -46,6 +48,7 @@ declare module 'claude-code' {
       ui: PetUi
       chat: PetChatLine[]
       usage: PetUsage | null
+      lang: PetLang
     }
   }
 }

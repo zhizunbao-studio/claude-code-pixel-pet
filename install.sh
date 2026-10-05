@@ -103,7 +103,7 @@ install() {
   backup_settings
   edit_settings add
   say "Added the pet to $SETTINGS"
-  say "Done. Open a new Claude Code session (or restart the desktop app) to meet 小克."
+  say "Done. Open a new Claude Code session (or restart the desktop app) to meet your pixel pet (run /pet lang zh for Chinese)."
 }
 
 uninstall() {
