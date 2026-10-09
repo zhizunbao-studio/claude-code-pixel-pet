@@ -127,6 +127,13 @@ test('/pet lang auto follows a Chinese locale', async ($, on) => {
   expect((await $.command.run(runPet('lang auto'))).text).toBe('宠物语言：auto (zh)')
 })
 
+test('/pet lang auto follows the macOS language when no LANG is set', async ($, on) => {
+  mock.store(on)
+  mock.env(on, {})
+  on('process.run', () => ({ value: { exitCode: 0, stdout: '(\n    "zh-Hans-CN"\n)\n', stderr: '' } }))
+  expect((await $.command.run(runPet('lang auto'))).text).toBe('宠物语言：auto (zh)')
+})
+
 test('/pet lang auto falls back to English for other locales', async ($, on) => {
   mock.store(on)
   mock.env(on, { LANG: 'en_US.UTF-8' })

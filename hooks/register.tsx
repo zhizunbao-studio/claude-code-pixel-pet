@@ -80,6 +80,14 @@ async function detectLang($: Engine): Promise<PetLang> {
     value => value !== undefined && value !== '' && value !== 'C' && value !== 'POSIX',
   )
   if (fromEnv !== undefined) return langOfLocale(fromEnv)
+  // The desktop app passes no LANG, and its runtime's locale is en-US: ask macOS
+  // for the person's preferred language; elsewhere `defaults` does not start.
+  const macLanguages = await $.process
+    .run(['defaults', 'read', '-g', 'AppleLanguages'], { timeoutMs: 3000 })
+    .catch(() => undefined)
+  const preferred =
+    macLanguages?.exitCode === 0 ? /[A-Za-z]{2,3}(?:[-_][A-Za-z0-9]+)*/.exec(macLanguages.stdout)?.[0] : undefined
+  if (preferred !== undefined) return langOfLocale(preferred)
   try {
     return langOfLocale(Intl.DateTimeFormat().resolvedOptions().locale)
   } catch {
