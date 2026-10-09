@@ -28,7 +28,7 @@ An 8-bit pixel pet that lives above the Claude Code prompt. It acts out whatever
 - **Follows the work**: thinks when you send a message, types at a laptop while a command runs, reads a book while files are read, writes with a pencil while code is edited, holds a magnifier on the web, and calls a mini helper for subagents. It cries when a tool fails, waves and hops when a turn is done, and falls asleep after 10 quiet minutes.
 - **Interaction**: pet it, feed it (it gets full), poke it (too many pokes and it gets grumpy), hover it for a heart. Level and affection persist across sessions.
 - **Haiku chat**: press Chat to talk to it. After a longer turn it says one line about what just happened, at most once every 40 seconds.
-- **Usage at a glance**: 5-hour and weekly limits as 8-cell pixel meters (green, yellow, red), time to reset, and the session's context tokens and cost.
+- **Usage at a glance**: 5-hour and weekly limits as 8-cell pixel meters (green, yellow, red), time to reset. At 80% and again at 95% of a limit, the pet warns you once per reset cycle.
 - **English or Chinese**: the pet follows your system language (English unless it is Chinese). Switch any time with `/pet lang en`, `/pet lang zh` or `/pet lang auto`; the choice is remembered.
 - **Commands**: `/pet` collapses or expands it, `/pet name <name>` renames it, `/pet stats` shows its stats, `/pet lang` sets its language.
 

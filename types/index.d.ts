@@ -38,7 +38,7 @@ export type PetChatLine = { from: 'me' | 'pet'; text: string }
 
 export type PetUsageWindow = { kind: string; percent: number; resetsAt?: string }
 
-export type PetUsage = { windows: PetUsageWindow[]; tokens?: number; usd?: number; at: number }
+export type PetUsage = { windows: PetUsageWindow[]; at: number }
 
 declare module 'claude-code' {
   interface PluginState {

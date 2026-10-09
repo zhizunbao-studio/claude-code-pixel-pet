@@ -81,8 +81,8 @@ test('the usage group speaks the chosen language, expanded and collapsed', async
   await $.session.measure({ context: { window: 1_000_000 }, rateLimits: [], changed: [] })
 
   const steps = [
-    { lang: 'en', texts: [/5h/, /Week/, /74%/, /4h 38m/, /Session/, /272\.6k/, /\$5\.70/] },
-    { lang: 'zh', texts: [/5小时/, /每周/, /74%/, /4小时38分/, /本次会话/, /272\.6k/, /\$5\.70/] },
+    { lang: 'en', texts: [/5h/, /Week/, /74%/, /4h 38m/], gone: [/Session/, /272\.6k/, /\$5\.70/] },
+    { lang: 'zh', texts: [/5小时/, /每周/, /74%/, /4小时38分/], gone: [/本次会话/, /272\.6k/, /\$5\.70/] },
   ]
   for (const step of steps) {
     await $.command.run(runPet(`lang ${step.lang}`))
@@ -91,6 +91,10 @@ test('the usage group speaks the chosen language, expanded and collapsed', async
       for (const text of step.texts) {
         const found = (await ui.find({ text })) ? 'ok' : 'missing'
         expect(`${step.lang}/${surface} ${text}:${found}`).toBe(`${step.lang}/${surface} ${text}:ok`)
+      }
+      for (const text of step.gone) {
+        const shown = (await ui.find({ text })) ? 'shown' : 'gone'
+        expect(`${step.lang}/${surface} ${text}:${shown}`).toBe(`${step.lang}/${surface} ${text}:gone`)
       }
       if (surface === 'desktop') {
         await ui.press({ key: 'collapse' })
@@ -127,4 +131,40 @@ test('/pet lang auto falls back to English for other locales', async ($, on) => 
   mock.store(on)
   mock.env(on, { LANG: 'en_US.UTF-8' })
   expect((await $.command.run(runPet('lang auto'))).text).toBe('Pet language: auto (en)')
+})
+
+test('quota warns once at 80% and again at 95% per window cycle', async ($, on) => {
+  mock.store(on)
+  mock.clock(on)
+  const toasts: string[] = []
+  on('ui.toast', (_$, e) => {
+    toasts.push(e.text)
+
+    return { value: undefined }
+  })
+  fakeUsage(on)
+  await $.command.run(runPet('lang zh'))
+  const cycle = new Date(Date.now() + 2 * 60 * 60_000).toISOString()
+  const next = new Date(Date.now() + 7 * 60 * 60_000).toISOString()
+  const measure = (percentUsed: number, resetsAt = cycle) =>
+    $.session.measure({
+      context: { window: 1_000_000 },
+      rateLimits: [{ kind: 'five_hour', percentUsed, resetsAt }],
+      changed: [],
+    })
+
+  await measure(50)
+  expect(toasts.length).toBe(0)
+  await measure(82)
+  expect(toasts.length).toBe(1)
+  expect(/5小时额度已用 82%，\d+小时\d+分后重置/.test(toasts[0] ?? '')).toBe(true)
+  await measure(88)
+  expect(toasts.length).toBe(1)
+  await measure(96)
+  expect(toasts.length).toBe(2)
+  expect(/96%/.test(toasts[1] ?? '')).toBe(true)
+  await measure(97)
+  expect(toasts.length).toBe(2)
+  await measure(85, next)
+  expect(toasts.length).toBe(3)
 })

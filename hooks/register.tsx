@@ -5,12 +5,13 @@ import type { PetChatLine, PetLang, PetMood, PetStats, PetUi, PetUsage, PetView 
 import { MOOD_FACE, TEXT, langOfLocale, levelOf, nameOf, pick, tidy } from './i18n'
 import type { Text } from './i18n'
 import { drawPet } from './sprite'
-import { SHOWN_WINDOWS, fmtReset, fmtTokens, levelColor, meterSvg } from './usage'
+import { SHOWN_WINDOWS, fmtReset, levelColor, meterSvg, quotaLevel } from './usage'
 
 type Engine = EngineInterface
 
 const STORE_KEY = 'stats'
 const LANG_KEY = 'lang'
+const QUOTA_KEY = 'quota'
 const MINUTE = 60_000
 const SLEEP_AFTER_MS = 10 * MINUTE
 const HOLD_MS = 4500
@@ -255,11 +256,48 @@ async function refreshUsage($: Engine) {
     windows: usage.rateLimits
       .filter(limit => SHOWN_WINDOWS.includes(limit.kind))
       .map(limit => ({ kind: limit.kind, percent: limit.percentUsed, resetsAt: limit.resetsAt })),
-    tokens: usage.context.tokens,
-    usd: usage.cost?.usd,
     at: Date.now(),
   }
   await update($, usageAtom, () => snapshot)
+}
+
+// Each quota window's warning already given, for the window's current cycle.
+type QuotaMemo = Record<string, { cycle: string; level: number }>
+
+// Warns once per window and cycle at each level: 80%, then 95%.
+async function warnQuota($: Engine, limits: readonly { kind: string; percentUsed: number; resetsAt?: string }[]) {
+  const saved = await $.store.get(QUOTA_KEY)
+  const memo: QuotaMemo = saved !== null && typeof saved === 'object' ? (saved as QuotaMemo) : {}
+  const lang = await read($, langAtom)
+  const text = TEXT[lang]
+  let worst = 0
+  let warning: string | undefined
+  for (const limit of limits) {
+    if (!SHOWN_WINDOWS.includes(limit.kind)) continue
+    const level = quotaLevel(limit.percentUsed)
+    worst = Math.max(worst, level)
+    const cycle = (limit.resetsAt ?? '').slice(0, 16)
+    const seen = memo[limit.kind]
+    const warned = seen?.cycle === cycle ? seen.level : 0
+    if (level > warned) {
+      const stats = await read($, statsAtom)
+      const reset = fmtReset(limit.resetsAt, Date.now(), text.durations)
+      const window = text.windows[limit.kind] ?? limit.kind
+      warning = text.nearLimit(nameOf(stats, lang), window, Math.round(limit.percentUsed), reset)
+    }
+    memo[limit.kind] = { cycle, level: Math.max(level, warned) }
+  }
+  await $.store.set(QUOTA_KEY, memo)
+
+  const wasTired = isTired
+  isTired = worst > 0
+  const view = await read($, viewAtom)
+  if (warning !== undefined) {
+    $.ui.toast(warning)
+    if (view.mood === 'idle') await setMood($, 'tired')
+  } else if (isTired !== wasTired && view.mood === 'tired') {
+    await settle($)
+  }
 }
 
 async function tick($: Engine) {
@@ -377,16 +415,7 @@ export const register: Register = on => {
 
   on('session.measure', async ($, e, next) => {
     await refreshUsage($)
-    const worst = Math.max(0, ...e.rateLimits.map(limit => limit.percentUsed))
-    const wasTired = isTired
-    isTired = worst >= 90
-    if (isTired && !wasTired) {
-      const stats = await read($, statsAtom)
-      const lang = await read($, langAtom)
-      $.ui.toast(TEXT[lang].nearLimit(nameOf(stats, lang), worst))
-      const view = await read($, viewAtom)
-      if (view.mood === 'idle') await setMood($, 'tired')
-    }
+    await warnQuota($, e.rateLimits)
 
     return next(e)
   })
@@ -413,27 +442,20 @@ export const register: Register = on => {
       const sep = <Text dimColor>│</Text>
       const usageGroup =
         usage === null ? null : (
-          <Box flexDirection="column" gap={1}>
-            <Box flexDirection="row" gap={1} alignItems="center" flexWrap="wrap">
-              {usage.windows.map((w, i) => {
-                const reset = fmtReset(w.resetsAt, usage.at, text.durations)
+          <Box flexDirection="row" gap={1} alignItems="center" flexWrap="wrap">
+            {usage.windows.map((w, i) => {
+              const reset = fmtReset(w.resetsAt, usage.at, text.durations)
 
-                return (
-                  <Box key={w.kind} flexDirection="row" gap={1} alignItems="center">
-                    {i > 0 && sep}
-                    <Text bold>{windowName(w.kind)}</Text>
-                    <Svg source={meterSvg(w.percent)} alt={text.used(w.percent)} width={39} height={8} />
-                    <Text color={levelColor(w.percent)}>{Math.round(w.percent)}%</Text>
-                    {reset !== '' && <Text dimColor>{text.resetIn(reset)}</Text>}
-                  </Box>
-                )
-              })}
-            </Box>
-            <Box flexDirection="row" gap={1} alignItems="center">
-              <Text bold>{text.session}</Text>
-              <Text>{usage.tokens === undefined ? '—' : `${fmtTokens(usage.tokens)} tokens`}</Text>
-              {usage.usd !== undefined && <Text dimColor>· ${usage.usd.toFixed(2)}</Text>}
-            </Box>
+              return (
+                <Box key={w.kind} flexDirection="row" gap={1} alignItems="center">
+                  {i > 0 && sep}
+                  <Text bold>{windowName(w.kind)}</Text>
+                  <Svg source={meterSvg(w.percent)} alt={text.used(w.percent)} width={39} height={8} />
+                  <Text color={levelColor(w.percent)}>{Math.round(w.percent)}%</Text>
+                  {reset !== '' && <Text dimColor>{text.resetIn(reset)}</Text>}
+                </Box>
+              )
+            })}
           </Box>
         )
 
@@ -441,9 +463,9 @@ export const register: Register = on => {
         return (
           // Only the picture and one column at this level, as in the expanded
           // band: a Button beside them here lays the row out off-centre.
-          <Box flexDirection="row" gap={2} alignItems="center">
+          <Box flexDirection="row" gap={2} alignItems="stretch">
             <Svg source={svg} alt={alt} width={132} height={84} isInteractive />
-            <Box flexDirection="column" gap={1} flexGrow={1}>
+            <Box flexDirection="column" gap={1} flexGrow={1} justifyContent="space-between">
               <Box flexDirection="row" gap={1} alignItems="center" justifyContent="space-between">
                 <Text dimColor>{head}</Text>
                 <Button key="expand" label={text.buttons.expand} plain onPress={() => void toggleCollapsed($)} />
@@ -455,9 +477,11 @@ export const register: Register = on => {
       }
 
       return (
-        <Box flexDirection="row" gap={2} alignItems="center">
+        // Stretched rows share the picture's height; space-between puts the first
+        // line on the frame's top edge and the last on its bottom edge.
+        <Box flexDirection="row" gap={2} alignItems="stretch">
           <Svg source={svg} alt={alt} width={176} height={112} isInteractive />
-          <Box flexDirection="column" gap={1} flexGrow={1}>
+          <Box flexDirection="column" gap={1} flexGrow={1} justifyContent="space-between">
             <Text dimColor>{head}</Text>
             <Text bold color="#D97757">
               {text.quote(view.line)}
@@ -528,10 +552,6 @@ export const register: Register = on => {
                 .map(
                   w =>
                     `${windowName(w.kind)} ${Math.round(w.percent)}% ↻${fmtReset(w.resetsAt, usage.at, text.durations)}`,
-                )
-                .concat(
-                  `${text.session} ${usage.tokens === undefined ? '—' : fmtTokens(usage.tokens)}` +
-                    (usage.usd === undefined ? '' : ` · $${usage.usd.toFixed(2)}`),
                 )
                 .join(' │ ')}
             </Text>

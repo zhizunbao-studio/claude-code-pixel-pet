@@ -8,13 +8,11 @@ export const SHOWN_WINDOWS = ['five_hour', 'seven_day']
 export const levelColor = (percent: number): string =>
   percent < 60 ? '#5BBF6A' : percent < 85 ? '#E5A82E' : '#E5534B'
 
-/** 272600 -> `272.6k`, 1234567 -> `1.2M`. */
-export const fmtTokens = (n: number): string => {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`
+/** Quota levels that warn, highest first. */
+const QUOTA_LEVELS = [95, 80] as const
 
-  return String(n)
-}
+/** The highest warning level `percent` has reached, 0 below them all. */
+export const quotaLevel = (percent: number): number => QUOTA_LEVELS.find(level => percent >= level) ?? 0
 
 /** Time left until `iso` in the language's units (`4h 38m`, `4小时38分`); empty when unreadable. */
 export const fmtReset = (iso: string | undefined, now: number, units: Durations): string => {

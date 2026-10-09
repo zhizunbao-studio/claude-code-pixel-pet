@@ -18,7 +18,7 @@ export type Text = {
   greeting: (hour: number) => string
   stopped: string
   levelUp: (name: string, level: number) => string
-  nearLimit: (name: string, percent: number) => string
+  nearLimit: (name: string, window: string, percent: number, reset: string) => string
   persona: (name: string, level: number, affection: number) => string
   maxLine: number
   toolJoiner: string
@@ -42,7 +42,6 @@ export type Text = {
   windows: Record<string, string>
   resetIn: (left: string) => string
   durations: Durations
-  session: string
   used: (percent: number) => string
   command: {
     description: string
@@ -110,7 +109,8 @@ const ZH: Text = {
             : '晚上好，我陪着你',
   stopped: '好的，停下啦',
   levelUp: (name, level) => `${name} 升到 Lv.${level} 啦！`,
-  nearLimit: (name, percent) => `${name}：额度已用 ${percent}%，悠着点～`,
+  nearLimit: (name, window, percent, reset) =>
+    `${name}：${window}额度已用 ${percent}%${reset === '' ? '' : `，${reset}后重置`}，悠着点～`,
   persona: (name, level, affection) =>
     [
       `你是「${name}」，一只住在 Claude Code 输入框上方的 8-bit 像素电子宠物，长得像一只橙色的小 Claude。`,
@@ -149,7 +149,6 @@ const ZH: Text = {
     hours: (h, m) => `${h}小时${m}分`,
     days: (d, h) => `${d}天${h}小时`,
   },
-  session: '本次会话',
   used: percent => `已用 ${percent}%`,
   command: {
     description: '像素宠物：/pet 收起或展开，/pet name 新名字，/pet stats 看数据，/pet lang zh|en|auto 切换语言',
@@ -219,7 +218,8 @@ const EN: Text = {
             : 'Evening, I’m here with you',
   stopped: 'Okay, stopping',
   levelUp: (name, level) => `${name} reached Lv.${level}!`,
-  nearLimit: (name, percent) => `${name}: ${percent}% of your limit used, go easy~`,
+  nearLimit: (name, window, percent, reset) =>
+    `${name}: ${window} limit ${percent}% used${reset === '' ? '' : `, resets in ${reset}`}, go easy~`,
   persona: (name, level, affection) =>
     [
       `You are "${name}", an 8-bit pixel pet living above the Claude Code prompt, shaped like a little orange Claude.`,
@@ -258,7 +258,6 @@ const EN: Text = {
     hours: (h, m) => `${h}h ${m}m`,
     days: (d, h) => `${d}d ${h}h`,
   },
-  session: 'Session',
   used: percent => `${percent}% used`,
   command: {
     description: 'Pixel pet: /pet to collapse or expand, /pet name <name>, /pet stats, /pet lang en|zh|auto',
