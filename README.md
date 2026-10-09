@@ -4,7 +4,7 @@
 
 An 8-bit pixel pet that lives above the Claude Code prompt. It acts out whatever Claude is doing, takes pets, snacks and pokes, chats with you through Haiku, and keeps an eye on your usage limits.
 
-<img src="docs/showcase.svg" alt="The pet above the Claude Code prompt, cycling through thinking, running a command, reading, editing, done and being petted" width="100%">
+<img src="docs/demo.gif" alt="Demo: the pet above the Claude Code prompt, cycling through thinking, running a command, reading, editing, done and being petted" width="100%">
 
 <sub>Mock-up with sample usage figures.</sub>
 
